@@ -1,21 +1,21 @@
 # CogNote
 
-A PDF annotation app with smooth pen strokes, highlighter, shapes, and export. Open one or more PDFs, annotate with pen, highlighter, eraser, and shapes (box, circle, arrow), then export with annotations burned in.
+CogNote lets you open PDFs and mark them up with a pen, highlighter, and shapes. You can open more than one PDF at a time, add notes and drawings, then save or export a new PDF with your annotations included.
 
-## Features
+## What you can do
 
-- **Pen**: Smooth strokes with adjustable thickness (saved per session)
-- **Highlighter**: Semi-transparent marker that keeps underlying text readable
-- **Eraser**: Remove paths and shapes
-- **Shapes**: Rectangle, circle, arrow
-- **Select**: Box-select, multi-drag, resize handles for selected annotations
-- **Multiple PDFs**: Add PDFs via navbar button or drag-and-drop; tabbed documents
-- **All Pages**: Resizable sidebar with thumbnails, insert blank page
-- **Export**: Full PDF or current page only, with annotations burned in
-- **Undo/Redo**: Full history with keyboard shortcuts
-- **Auto-save**: Annotations and current page saved per document (IndexedDB)
-- **Light/Dark theme**: Toggle in navbar
-- **Keyboard shortcuts**: Undo, redo, copy, paste, delete, zoom, toggle All Pages panel
+- **Pen**: Draw with adjustable thickness. Your thickness choice is remembered.
+- **Highlighter**: Mark text without hiding it; the highlight stays see-through.
+- **Eraser**: Remove pen strokes and shapes.
+- **Shapes**: Add rectangles, circles, and arrows.
+- **Select**: Select one or several annotations to move, resize, or delete them.
+- **Multiple PDFs**: Add PDFs from the navbar or by dragging files. Switch between them with tabs.
+- **All Pages**: Use the sidebar to see all pages, jump to one, or add a blank page.
+- **Export**: Download the full PDF or just the current page with all annotations saved in.
+- **Undo / Redo**: Full undo and redo, including keyboard shortcuts.
+- **Auto-save**: Annotations and your place in the document are saved automatically.
+- **Light / Dark theme**: Switch theme from the navbar.
+- **Keyboard shortcuts**: Undo, redo, copy, paste, delete, zoom, and more. Click "?" in the navbar to see the list.
 
 ## Quick Start
 
@@ -24,7 +24,7 @@ npm install
 npm run dev
 ```
 
-Open the URL shown in the terminal (e.g. http://localhost:5173/).
+Open the URL shown in the terminal in your browser.
 
 ## Hosting on GitHub Pages
 
@@ -38,17 +38,11 @@ The repo includes a workflow that builds and deploys the app on every push to `m
 
 ## Usage
 
-- **Add PDF**: Click "Add PDF" in the navbar or drop a PDF on the empty state. You can select multiple files at once.
-- **Annotate**: Choose a tool from the left sidebar (pen, highlighter, eraser, shapes). Use the thickness slider when pen or highlighter is active.
-- **Select**: Use the select tool, then drag to box-select. Move, resize, or delete selected items from the floating bar.
-- **Export**: Use "Export" (full PDF) or "Page" (current page only) in the navbar.
+- **Add PDF**: Click "Add PDF" in the navbar or drop a PDF on the empty area. You can select multiple files at once.
+- **Annotate**: Pick a tool from the left sidebar (pen, highlighter, eraser, shapes). When pen or highlighter is active, use the thickness slider.
+- **Select**: Use the select tool and drag to draw a box around items. Then move, resize, or delete them from the bar that appears.
+- **Export**: Use "Export" for the full PDF or "Page" for only the current page.
 - **Shortcuts**: Click "?" in the navbar to see keyboard shortcuts.
-
-## Tech Stack
-
-- React 19, TypeScript, Vite 7
-- PDF.js for rendering, perfect-freehand for smooth strokes, jsPDF for export
-- State: React Context + useReducer; persistence: IndexedDB and localStorage
 
 ## Scripts
 
