@@ -2,7 +2,7 @@
  * Cognote — Toolbar. Blue accent, light/dark theme toggle.
  */
 /* eslint-disable react-refresh/only-export-components -- TOOLBAR_OFFSET shared with App */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useSyncExternalStore } from 'react';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
 import { useAppState } from '../core/store';
 import { exportPdfWithAnnotations, exportCurrentPageAsPdf } from '../lib/pdfExport';
@@ -101,6 +101,36 @@ function RedoIcon() {
     </svg>
   );
 }
+function MenuIcon() {
+  return (
+    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+  );
+}
+function CloseIcon() {
+  return (
+    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
+const MOBILE_NAV_BREAKPOINT = 600;
+
+function useMediaQuery(query: string): boolean {
+  const subscribe = (callback: () => void) => {
+    const mql = window.matchMedia(query);
+    mql.addEventListener('change', callback);
+    return () => mql.removeEventListener('change', callback);
+  };
+  const getSnapshot = () => window.matchMedia(query).matches;
+  const getServerSnapshot = () => false;
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
 
 interface FunkyToolbarProps {
   pdfDoc?: PDFDocumentProxy | null;
@@ -173,8 +203,23 @@ export function FunkyToolbar({
   const showThickness = tool === 'pen' || tool === 'highlighter';
   const thicknessSlider = Math.min(100, Math.max(0, strokeToSlider(strokeWidth)));
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isMobileNav = useMediaQuery(`(max-width: ${MOBILE_NAV_BREAKPOINT}px)`);
   const isMac = typeof navigator !== 'undefined' && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
   const mod = isMac ? '⌘' : 'Ctrl';
+
+  useEffect(() => {
+    if (!isMobileNav) setMobileMenuOpen(false);
+  }, [isMobileNav]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileMenuOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [mobileMenuOpen]);
 
   const handleExport = async () => {
     if (!pdfDoc || !fileName) return;
@@ -226,6 +271,48 @@ export function FunkyToolbar({
           overflowY: 'hidden',
         }}
       >
+        {isMobileNav ? (
+          <div className="cognote-navbar-mobile" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', height: '100%' }}>
+            <span
+              className="cognote-logo"
+              style={{
+                fontSize: 18,
+                fontWeight: 800,
+                letterSpacing: '0.12em',
+                color: theme.accent.main,
+                textShadow: `0 0 24px ${theme.accent.glow}, 0 2px 4px rgba(0,0,0,0.15)`,
+                lineHeight: 1,
+                fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+                flexShrink: 0,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {APP_NAME}
+            </span>
+            <button
+              type="button"
+              className="cognote-navbar-menu-btn"
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileMenuOpen}
+              onClick={() => setMobileMenuOpen((o) => !o)}
+              style={{
+                width: 44,
+                height: 44,
+                padding: 0,
+                border: `1px solid ${theme.border.subtle}`,
+                borderRadius: theme.inputRadius,
+                background: mobileMenuOpen ? theme.hover.accent : theme.bg.input,
+                color: theme.accent.main,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {mobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
+            </button>
+          </div>
+        ) : (
         <div
           className="cognote-navbar-inner"
           style={{
@@ -527,39 +614,6 @@ export function FunkyToolbar({
           >
             ?
           </button>
-          {shortcutsOpen && (
-            <div
-              className="cognote-shortcuts-dialog"
-              role="dialog"
-              aria-label="Keyboard shortcuts"
-              style={{
-                position: 'absolute',
-                top: theme.topBarHeight + 8,
-                padding: 16,
-                background: theme.bg.elevated,
-                border: `1px solid ${theme.border.strong}`,
-                borderRadius: 12,
-                boxShadow: theme.navbarShadow,
-                zIndex: 1000,
-                fontSize: 12,
-                color: theme.text.primary,
-              }}
-            >
-              <div style={{ fontWeight: 700, marginBottom: 12, fontSize: 13, color: theme.accent.main }}>Shortcuts</div>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <tbody>
-                  <tr><td style={{ padding: '4px 8px 4px 0', color: theme.text.muted }}>Undo</td><td style={{ padding: 4, fontFamily: 'monospace' }}>{mod}+Z</td></tr>
-                  <tr><td style={{ padding: '4px 8px 4px 0', color: theme.text.muted }}>Redo</td><td style={{ padding: 4, fontFamily: 'monospace' }}>{mod}+⇧Z</td></tr>
-                  <tr><td style={{ padding: '4px 8px 4px 0', color: theme.text.muted }}>Copy</td><td style={{ padding: 4, fontFamily: 'monospace' }}>{mod}+C</td></tr>
-                  <tr><td style={{ padding: '4px 8px 4px 0', color: theme.text.muted }}>Paste</td><td style={{ padding: 4, fontFamily: 'monospace' }}>{mod}+V</td></tr>
-                  <tr><td style={{ padding: '4px 8px 4px 0', color: theme.text.muted }}>Delete selected</td><td style={{ padding: 4, fontFamily: 'monospace' }}>Del / ⌫</td></tr>
-                  <tr><td style={{ padding: '4px 8px 4px 0', color: theme.text.muted }}>Zoom in</td><td style={{ padding: 4, fontFamily: 'monospace' }}>{mod}++</td></tr>
-                  <tr><td style={{ padding: '4px 8px 4px 0', color: theme.text.muted }}>Zoom out</td><td style={{ padding: 4, fontFamily: 'monospace' }}>{mod}+-</td></tr>
-                  <tr><td style={{ padding: '4px 8px 4px 0', color: theme.text.muted }}>Toggle All Pages</td><td style={{ padding: 4, fontFamily: 'monospace' }}>{mod}+⇧P</td></tr>
-                </tbody>
-              </table>
-            </div>
-          )}
           {onTogglePageSidebar && (
             <button
               type="button"
@@ -583,7 +637,213 @@ export function FunkyToolbar({
           )}
           </div>
         </div>
+        )}
       </header>
+
+      {isMobileNav && mobileMenuOpen && (
+        <>
+          <div
+            className="cognote-navbar-dropdown-backdrop"
+            role="presentation"
+            aria-hidden
+            onClick={() => setMobileMenuOpen(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              top: theme.topBarHeight,
+              background: 'rgba(0,0,0,0.4)',
+              zIndex: 199,
+            }}
+          />
+          <div
+            className="cognote-navbar-dropdown"
+            role="dialog"
+            aria-label="Menu"
+            style={{
+              position: 'fixed',
+              top: theme.topBarHeight,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 199,
+              background: theme.bg.elevated,
+              borderTop: `1px solid ${theme.border.subtle}`,
+              overflowY: 'auto',
+              padding: '16px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px))',
+              paddingBottom: 'max(24px, env(safe-area-inset-bottom, 0px))',
+            }}
+          >
+            <div className="cognote-navbar-dropdown-inner" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {onOpenDocument && (
+                <button
+                  type="button"
+                  onClick={() => { onOpenDocument(); setMobileMenuOpen(false); }}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    borderRadius: theme.inputRadius,
+                    border: `1px solid ${theme.accent.main}`,
+                    background: theme.hover.accent,
+                    color: theme.accent.bright,
+                    cursor: 'pointer',
+                    fontSize: 14,
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <span style={{ fontSize: 18 }}>+</span>
+                  Add PDF
+                </button>
+              )}
+              {showDocTabs && openDocuments.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: theme.text.muted, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Documents</span>
+                  {openDocuments.map((doc, i) => {
+                    const isActive = i === activeIndex;
+                    return (
+                      <div
+                        key={doc.docId}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 8,
+                          padding: '10px 12px',
+                          borderRadius: theme.inputRadius,
+                          border: `1px solid ${isActive ? theme.accent.main : theme.border.subtle}`,
+                          background: isActive ? theme.hover.accent : theme.bg.input,
+                        }}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => { onSwitchDocument?.(i); setMobileMenuOpen(false); }}
+                          style={{
+                            flex: 1,
+                            padding: 0,
+                            border: 'none',
+                            background: 'transparent',
+                            color: isActive ? theme.accent.bright : theme.text.secondary,
+                            cursor: 'pointer',
+                            fontSize: 14,
+                            fontWeight: 600,
+                            textAlign: 'left',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {shortenName(doc.fileName, 28)}
+                        </button>
+                        {onCloseDocument && (
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); onCloseDocument(i); setMobileMenuOpen(false); }}
+                            style={{
+                              width: 36,
+                              height: 36,
+                              padding: 0,
+                              border: 'none',
+                              borderRadius: 6,
+                              background: 'transparent',
+                              color: theme.text.muted,
+                              cursor: 'pointer',
+                              fontSize: 18,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                <button type="button" disabled={!canUndo} onClick={() => dispatch({ type: 'UNDO' })} className="cognote-dropdown-btn" style={{ flex: 1, minWidth: 100, padding: '12px 16px', borderRadius: theme.inputRadius, border: `1px solid ${theme.border.subtle}`, background: canUndo ? theme.hover.accent : theme.bg.input, color: canUndo ? theme.accent.main : theme.text.muted, cursor: canUndo ? 'pointer' : 'not-allowed', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  <UndoIcon /> Undo
+                </button>
+                <button type="button" disabled={!canRedo} onClick={() => dispatch({ type: 'REDO' })} className="cognote-dropdown-btn" style={{ flex: 1, minWidth: 100, padding: '12px 16px', borderRadius: theme.inputRadius, border: `1px solid ${theme.border.subtle}`, background: canRedo ? theme.hover.accent : theme.bg.input, color: canRedo ? theme.accent.main : theme.text.muted, cursor: canRedo ? 'pointer' : 'not-allowed', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  <RedoIcon /> Redo
+                </button>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <button type="button" onClick={() => dispatch({ type: 'SET_ZOOM', payload: Math.max(ZOOM_MIN, zoom - 0.1) })} className="cognote-dropdown-btn" style={{ width: 44, height: 44, padding: 0, borderRadius: 6, border: `1px solid ${theme.border.subtle}`, background: theme.bg.input, color: theme.text.primary, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ZoomOutIcon />
+                </button>
+                <span style={{ minWidth: 52, textAlign: 'center', fontSize: 14, fontWeight: 600, color: theme.text.secondary }}>{Math.round(zoom * 100)}%</span>
+                <button type="button" onClick={() => dispatch({ type: 'SET_ZOOM', payload: Math.min(ZOOM_MAX, zoom + 0.1) })} className="cognote-dropdown-btn" style={{ width: 44, height: 44, padding: 0, borderRadius: 6, border: `1px solid ${theme.border.subtle}`, background: theme.bg.input, color: theme.text.primary, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ZoomInIcon />
+                </button>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <button type="button" onClick={toggleMode} className="cognote-dropdown-btn" style={{ flex: 1, minWidth: 120, padding: '12px 16px', borderRadius: theme.inputRadius, border: `1px solid ${theme.border.subtle}`, background: theme.bg.input, color: theme.accent.main, cursor: 'pointer', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  {mode === 'dark' ? <SunIcon /> : <MoonIcon />}
+                  {mode === 'dark' ? 'Light' : 'Dark'} mode
+                </button>
+                {onTogglePageSidebar && (
+                  <button type="button" onClick={() => { onTogglePageSidebar(); setMobileMenuOpen(false); }} className="cognote-dropdown-btn" style={{ flex: 1, minWidth: 120, padding: '12px 16px', borderRadius: theme.inputRadius, border: `1px solid ${pageSidebarOpen ? theme.accent.main : theme.border.subtle}`, background: pageSidebarOpen ? theme.hover.accent : theme.bg.input, color: theme.accent.main, cursor: 'pointer', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                    <PagesIcon /> All Pages
+                  </button>
+                )}
+                <button type="button" onClick={() => { setShortcutsOpen((v) => !v); setMobileMenuOpen(false); }} className="cognote-dropdown-btn" style={{ width: 44, height: 44, padding: 0, borderRadius: 6, border: `1px solid ${theme.border.subtle}`, background: shortcutsOpen ? theme.hover.accent : theme.bg.input, color: theme.accent.main, cursor: 'pointer', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  ?
+                </button>
+              </div>
+              {pdfDoc && (
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <button type="button" onClick={async () => { await handleExportCurrentPage(); setMobileMenuOpen(false); }} className="cognote-dropdown-btn" style={{ flex: 1, minWidth: 100, padding: '12px 16px', borderRadius: theme.inputRadius, border: `1px solid ${theme.border.strong}`, background: theme.bg.input, color: theme.text.secondary, cursor: 'pointer', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                    <PagesIcon /> Export page
+                  </button>
+                  <button type="button" onClick={async () => { await handleExport(); setMobileMenuOpen(false); }} className="cognote-dropdown-btn" style={{ flex: 1, minWidth: 100, padding: '12px 16px', borderRadius: theme.inputRadius, border: `1px solid ${theme.accent.main}`, background: theme.hover.accent, color: theme.accent.bright, cursor: 'pointer', fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                    <ExportIcon /> Export PDF
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {shortcutsOpen && (
+        <div
+          className="cognote-shortcuts-dialog"
+          role="dialog"
+          aria-label="Keyboard shortcuts"
+          style={{
+            position: 'fixed',
+            top: theme.topBarHeight + 8,
+            right: 'max(16px, env(safe-area-inset-right, 0px))',
+            left: 'auto',
+            padding: 16,
+            background: theme.bg.elevated,
+            border: `1px solid ${theme.border.strong}`,
+            borderRadius: 12,
+            boxShadow: theme.navbarShadow,
+            zIndex: 1000,
+            fontSize: 12,
+            color: theme.text.primary,
+          }}
+        >
+          <div style={{ fontWeight: 700, marginBottom: 12, fontSize: 13, color: theme.accent.main }}>Shortcuts</div>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <tbody>
+              <tr><td style={{ padding: '4px 8px 4px 0', color: theme.text.muted }}>Undo</td><td style={{ padding: 4, fontFamily: 'monospace' }}>{mod}+Z</td></tr>
+              <tr><td style={{ padding: '4px 8px 4px 0', color: theme.text.muted }}>Redo</td><td style={{ padding: 4, fontFamily: 'monospace' }}>{mod}+⇧Z</td></tr>
+              <tr><td style={{ padding: '4px 8px 4px 0', color: theme.text.muted }}>Copy</td><td style={{ padding: 4, fontFamily: 'monospace' }}>{mod}+C</td></tr>
+              <tr><td style={{ padding: '4px 8px 4px 0', color: theme.text.muted }}>Paste</td><td style={{ padding: 4, fontFamily: 'monospace' }}>{mod}+V</td></tr>
+              <tr><td style={{ padding: '4px 8px 4px 0', color: theme.text.muted }}>Delete selected</td><td style={{ padding: 4, fontFamily: 'monospace' }}>Del / ⌫</td></tr>
+              <tr><td style={{ padding: '4px 8px 4px 0', color: theme.text.muted }}>Zoom in</td><td style={{ padding: 4, fontFamily: 'monospace' }}>{mod}++</td></tr>
+              <tr><td style={{ padding: '4px 8px 4px 0', color: theme.text.muted }}>Zoom out</td><td style={{ padding: 4, fontFamily: 'monospace' }}>{mod}+-</td></tr>
+              <tr><td style={{ padding: '4px 8px 4px 0', color: theme.text.muted }}>Toggle All Pages</td><td style={{ padding: 4, fontFamily: 'monospace' }}>{mod}+⇧P</td></tr>
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {onToggleToolbar && (
         <button

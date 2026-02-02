@@ -88,6 +88,31 @@ button {
   white-space: nowrap;
 }
 
+/* Mobile navbar: hamburger + dropdown (≤600px) */
+.cognote-navbar-mobile {
+  padding: 0 4px;
+}
+
+.cognote-navbar-menu-btn {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.cognote-navbar-dropdown {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.cognote-navbar-dropdown-inner {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.cognote-dropdown-btn {
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
 /* Small viewport: tighter padding, doc tabs scroll within left section */
 @media (max-width: 768px) {
   .cognote-toolbar header {
