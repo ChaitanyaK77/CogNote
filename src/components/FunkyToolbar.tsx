@@ -117,14 +117,14 @@ interface FunkyToolbarProps {
   onTogglePageSidebar?: () => void;
 }
 
-const TOOLS: { id: ToolId; label: string; icon: string }[] = [
-  { id: 'select', label: 'Select', icon: '◎' },
-  { id: 'pen', label: 'Pen', icon: '✎' },
-  { id: 'highlighter', label: 'Highlighter', icon: '▬' },
-  { id: 'eraser', label: 'Eraser', icon: '⌫' },
-  { id: 'rectangle', label: 'Box', icon: '▢' },
-  { id: 'circle', label: 'Circle', icon: '○' },
-  { id: 'arrow', label: 'Arrow', icon: '→' },
+const TOOLS: { id: ToolId; label: string; icon: string; hint: string }[] = [
+  { id: 'select', label: 'Select', icon: '◎', hint: 'Select, move, or resize annotations' },
+  { id: 'pen', label: 'Pen', icon: '✎', hint: 'Draw with adjustable thickness' },
+  { id: 'highlighter', label: 'Highlighter', icon: '▬', hint: 'Highlight text; stays see-through' },
+  { id: 'eraser', label: 'Eraser', icon: '⌫', hint: 'Remove strokes and shapes' },
+  { id: 'rectangle', label: 'Box', icon: '▢', hint: 'Draw a rectangle' },
+  { id: 'circle', label: 'Circle', icon: '○', hint: 'Draw a circle or ellipse' },
+  { id: 'arrow', label: 'Arrow', icon: '→', hint: 'Draw an arrow' },
 ];
 
 const COLORS = [
@@ -132,10 +132,10 @@ const COLORS = [
   '#22C55E', '#3B82F6', '#8B5CF6', '#EC4899',
 ];
 
-const LAYOUTS: { id: 'default' | 'ruled' | 'sepia'; label: string }[] = [
-  { id: 'default', label: 'Plain' },
-  { id: 'ruled', label: 'Ruled' },
-  { id: 'sepia', label: 'Sepia' },
+const LAYOUTS: { id: 'default' | 'ruled' | 'sepia'; label: string; hint: string }[] = [
+  { id: 'default', label: 'Plain', hint: 'Plain white background' },
+  { id: 'ruled', label: 'Ruled', hint: 'Ruled lines on the page' },
+  { id: 'sepia', label: 'Sepia', hint: 'Sepia-tinted paper' },
 ];
 
 const STROKE_MIN = 0.0015;
@@ -208,43 +208,62 @@ export function FunkyToolbar({
   return (
     <>
       <header
-        className="cognote-toolbar"
+        className="cognote-toolbar cognote-navbar"
         style={{
           position: 'relative',
+          zIndex: 200,
           height: theme.topBarHeight,
           minHeight: theme.topBarHeight,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 24px 0 0',
+          paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
+          paddingRight: 'max(24px, env(safe-area-inset-right, 0px))',
           background: theme.bg.bar,
           borderBottom: `1px solid ${theme.border.subtle}`,
           boxShadow: theme.navbarShadow,
           flexShrink: 0,
+          overflowX: 'auto',
+          overflowY: 'hidden',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 0, flex: 1 }}>
-          <span
-            style={{
-              fontSize: 22,
-              fontWeight: 800,
-              letterSpacing: '0.18em',
-              color: theme.accent.main,
-              textShadow: `0 0 24px ${theme.accent.glow}, 0 2px 4px rgba(0,0,0,0.15)`,
-              marginRight: 16,
-              lineHeight: 1,
-              display: 'inline-block',
-              fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
-            }}
-          >
-            {APP_NAME}
-          </span>
+        <div
+          className="cognote-navbar-inner"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+            minWidth: 'min-content',
+            flex: '1 0 auto',
+            height: '100%',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 0, flexShrink: 0 }}>
+            <span
+              className="cognote-logo"
+              style={{
+                fontSize: 22,
+                fontWeight: 800,
+                letterSpacing: '0.18em',
+                color: theme.accent.main,
+                textShadow: `0 0 24px ${theme.accent.glow}, 0 2px 4px rgba(0,0,0,0.15)`,
+                marginRight: 8,
+                lineHeight: 1,
+                display: 'inline-block',
+                fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+                flexShrink: 0,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {APP_NAME}
+            </span>
           {onOpenDocument && (
             <button
               type="button"
               title="Add PDF"
               onClick={onOpenDocument}
               style={{
+                flexShrink: 0,
                 padding: '6px 14px',
                 borderRadius: theme.inputRadius,
                 border: `1px solid ${theme.accent.main}`,
@@ -259,11 +278,11 @@ export function FunkyToolbar({
               }}
             >
               <span style={{ fontSize: 16, lineHeight: 1 }}>+</span>
-              <span>Add PDF</span>
+              <span className="cognote-add-pdf-label">Add PDF</span>
             </button>
           )}
           {showDocTabs && openDocuments.length > 0 && (
-            <>
+            <div className="cognote-doc-tabs" style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
               {openDocuments.map((doc, i) => {
                 const isActive = i === activeIndex;
                 return (
@@ -332,10 +351,10 @@ export function FunkyToolbar({
                   </div>
                 );
               })}
-            </>
+            </div>
           )}
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
           <button
             type="button"
             title="Undo"
@@ -459,7 +478,8 @@ export function FunkyToolbar({
                   gap: 4,
                 }}
               >
-                <span>Page</span>
+                <PagesIcon />
+                <span className="cognote-page-label">Page</span>
               </button>
               <button
                 type="button"
@@ -482,7 +502,7 @@ export function FunkyToolbar({
                 }}
               >
                 <ExportIcon />
-                <span>Export</span>
+                <span className="cognote-export-label">Export</span>
               </button>
             </>
           )}
@@ -509,13 +529,12 @@ export function FunkyToolbar({
           </button>
           {shortcutsOpen && (
             <div
+              className="cognote-shortcuts-dialog"
               role="dialog"
               aria-label="Keyboard shortcuts"
               style={{
                 position: 'absolute',
                 top: theme.topBarHeight + 8,
-                right: 16,
-                minWidth: 260,
                 padding: 16,
                 background: theme.bg.elevated,
                 border: `1px solid ${theme.border.strong}`,
@@ -562,19 +581,20 @@ export function FunkyToolbar({
               <PagesIcon />
             </button>
           )}
+          </div>
         </div>
       </header>
 
       {onToggleToolbar && (
         <button
           type="button"
+          className={`cognote-tools-toggle${toolbarVisible ? ' cognote-tools-visible' : ''}`}
           title={toolbarVisible ? 'Hide tools' : 'Show tools'}
           onClick={onToggleToolbar}
           aria-label={toolbarVisible ? 'Hide tools panel' : 'Show tools panel'}
           style={{
             position: 'fixed',
-            left: toolbarVisible ? theme.sidebarWidth - 14 : 0,
-            top: `calc(${theme.topBarHeight}px + (100dvh - ${theme.topBarHeight}px) / 2 - 28px)`,
+            top: `calc(${theme.topBarHeight}px + env(safe-area-inset-top, 0px) + (100dvh - ${theme.topBarHeight}px - env(safe-area-inset-top, 0px)) / 2 - 28px)`,
             width: 28,
             height: 56,
             border: `1px solid ${theme.border.default}`,
@@ -605,13 +625,12 @@ export function FunkyToolbar({
 
       {toolbarVisible && (
       <aside
-        className="cognote-toolbar"
+        className="cognote-toolbar cognote-sidebar"
         style={{
           position: 'fixed',
-          left: 0,
           top: theme.topBarHeight,
+          left: 0,
           bottom: 0,
-          width: theme.sidebarWidth,
           background: theme.bg.panel,
           borderRight: `1px solid ${theme.border.default}`,
           display: 'flex',
@@ -626,7 +645,7 @@ export function FunkyToolbar({
           <button
             key={t.id}
             type="button"
-            title={t.label}
+            title={t.hint}
             onClick={() => dispatch({ type: 'SET_TOOL', payload: t.id })}
             style={{
               width: 48,
@@ -680,6 +699,7 @@ export function FunkyToolbar({
             <button
               key={c}
               type="button"
+              title={`Pick color ${c}`}
               onClick={() => dispatch({ type: 'SET_COLOR', payload: c })}
               style={{
                 width: 28,
@@ -702,7 +722,7 @@ export function FunkyToolbar({
               <button
                 key={l.id}
                 type="button"
-                title={l.label}
+                title={l.hint}
                 onClick={() => dispatch({ type: 'SET_PAGE_LAYOUT', payload: l.id })}
                 style={{
                   width: 52,

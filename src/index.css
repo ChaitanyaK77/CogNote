@@ -13,6 +13,9 @@
   --safe-right: env(safe-area-inset-right, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
+  --cognote-top-bar: 56px;
+  --cognote-sidebar: 72px;
+  --cognote-sidebar-width: 72px;
 }
 
 * {
@@ -43,20 +46,165 @@ button {
   font-family: inherit;
 }
 
-/* Display-friendly: prevent flex overflow, touch targets */
+/* Touch-friendly: remove tap delay, ensure touch targets */
 @media (pointer: coarse) {
   .cognote-toolbar button {
     min-width: 44px;
     min-height: 44px;
+    touch-action: manipulation;
+  }
+  .cognote-tools-toggle {
+    min-width: 44px;
+    width: 44px;
   }
 }
 
-/* Small viewport: ensure toolbar and main content don't overflow */
+/* Navbar: fixed height, no overlap — content scrolls horizontally when narrow */
+.cognote-toolbar header {
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cognote-navbar-inner {
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cognote-navbar-inner > div:first-child {
+  flex-wrap: nowrap;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cognote-navbar-inner > div:last-child {
+  flex-shrink: 0;
+}
+
+/* Logo never shrinks or gets cut off */
+.cognote-logo {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Small viewport: tighter padding, doc tabs scroll within left section */
+@media (max-width: 768px) {
+  .cognote-toolbar header {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .cognote-toolbar .cognote-doc-tabs {
+    flex-shrink: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: min(60vw, 280px);
+  }
+}
+
 @media (max-width: 640px) {
   .cognote-toolbar header {
     padding-left: 8px;
     padding-right: 8px;
   }
+  .cognote-navbar-inner > div:last-child {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cognote-toolbar header .cognote-logo {
+    font-size: 16px;
+    letter-spacing: 0.1em;
+    margin-right: 8px;
+  }
+  .cognote-add-pdf-label {
+    display: none;
+  }
+  .cognote-navbar-inner > div:last-child {
+    gap: 4px;
+  }
+  .cognote-export-label,
+  .cognote-page-label {
+    display: none;
+  }
+}
+
+/* Smaller displays: narrower sidebar and main layout */
+@media (max-width: 600px) {
+  :root {
+    --cognote-sidebar-width: 56px;
+  }
+}
+
+/* Left tools sidebar: scroll when short viewport so buttons don't overlap */
+.cognote-toolbar aside.cognote-sidebar {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Mobile/iPad: use dvh for viewport height, touch targets on interactive areas */
+@media (max-width: 900px) {
+  body {
+    min-height: 100dvh;
+  }
+  #root {
+    min-height: 100dvh;
+  }
+}
+
+/* Buttons and interactive elements: no double-tap zoom delay on touch */
+button, [role="button"], .annotation-layer {
+  touch-action: manipulation;
+}
+
+/* Safe area: fixed navbar and sidebar avoid notch/home indicator */
+.cognote-toolbar header.cognote-navbar {
+  padding-top: calc(8px + env(safe-area-inset-top, 0px));
+}
+.cognote-toolbar aside.cognote-sidebar {
+  top: calc(var(--cognote-top-bar) + env(safe-area-inset-top, 0px));
+  left: env(safe-area-inset-left, 0px);
+  width: var(--cognote-sidebar-width);
+}
+
+/* Main content area: margin when tools sidebar is visible */
+.cognote-main-wrap.cognote-sidebar-visible {
+  margin-left: var(--cognote-sidebar-width);
+}
+
+.cognote-filename-bar {
+  padding: 12px 20px;
+  font-size: 13px;
+}
+
+.cognote-doc-area {
+  padding: 0 clamp(8px, 1.5vw, 24px);
+}
+
+@media (max-width: 600px) {
+  .cognote-filename-bar {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  .cognote-doc-area {
+    padding: 0 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cognote-filename-bar {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+}
+
+/* Tools toggle: left position from variable for responsive sidebar width */
+.cognote-tools-toggle.cognote-tools-visible {
+  left: calc(var(--cognote-sidebar-width) - 14px + env(safe-area-inset-left, 0px));
+}
+.cognote-tools-toggle:not(.cognote-tools-visible) {
+  left: env(safe-area-inset-left, 0px);
 }
 
 /* Toolbar button hover */
@@ -79,4 +227,113 @@ button {
 
 .pdf-page-canvas {
   max-width: 100%;
+  height: auto;
+}
+
+/* ========== RWD: Responsive Web Design ========== */
+/* Breakpoints: 320 (xs), 480 (sm), 600, 640, 768 (md), 900, 1024 (lg) */
+
+/* Modals/dialogs: contain within viewport on small screens */
+.cognote-close-modal {
+  width: 100%;
+  max-width: min(400px, calc(100vw - 32px));
+  margin: 16px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.cognote-shortcuts-dialog {
+  max-width: min(280px, calc(100vw - 32px));
+  right: max(16px, env(safe-area-inset-right, 0px));
+  left: auto;
+}
+
+@media (max-width: 480px) {
+  .cognote-close-modal {
+    margin: 12px;
+    padding: 16px;
+  }
+  .cognote-shortcuts-dialog {
+    right: 8px;
+    left: 8px;
+    max-width: calc(100vw - 16px);
+  }
+}
+
+@media (max-width: 320px) {
+  .cognote-close-modal {
+    margin: 8px;
+    padding: 12px;
+  }
+  .cognote-toolbar header .cognote-logo {
+    font-size: 14px;
+  }
+}
+
+/* Page sidebar: narrower min-width on small viewports */
+.cognote-page-sidebar-wrap {
+  min-width: 160px;
+}
+
+@media (max-width: 600px) {
+  .cognote-page-sidebar-wrap {
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 360px) {
+  .cognote-page-sidebar-wrap {
+    min-width: 100px;
+  }
+}
+
+/* Empty state drop zone: responsive padding and typography */
+.cognote-drop-zone {
+  padding: 24px;
+  margin: 24px;
+}
+
+@media (max-width: 600px) {
+  .cognote-drop-zone {
+    padding: 16px;
+    margin: 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  .cognote-drop-zone {
+    padding: 12px;
+    margin: 12px;
+  }
+  .cognote-drop-zone .cognote-drop-zone-title {
+    font-size: 16px;
+  }
+  .cognote-drop-zone .cognote-drop-zone-hint {
+    font-size: 13px;
+  }
+}
+
+/* Prevent horizontal overflow on root and main content */
+.cognote-main-wrap {
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.cognote-doc-area {
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+/* Resize handle: larger touch target on coarse pointer */
+.cognote-page-resize-handle {
+  min-width: 6px;
+  width: 6px;
+}
+
+@media (pointer: coarse) {
+  .cognote-page-resize-handle {
+    min-width: 12px;
+    width: 12px;
+    margin-left: -3px;
+  }
 }

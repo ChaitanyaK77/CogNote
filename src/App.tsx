@@ -482,15 +482,14 @@ function AppContent() {
               }}
               onClick={() => setCloseModal(null)}
             >
-              <div
-                style={{
-                  background: theme.bg.surface,
-                  border: `1px solid ${theme.border.strong}`,
-                  borderRadius: 12,
-                  padding: 24,
-                  maxWidth: 400,
-                  boxShadow: theme.navbarShadow,
-                }}
+                <div
+                  className="cognote-close-modal"
+                  style={{
+                    background: theme.bg.surface,
+                    border: `1px solid ${theme.border.strong}`,
+                    borderRadius: 12,
+                    boxShadow: theme.navbarShadow,
+                  }}
                 onClick={(e) => e.stopPropagation()}
               >
                 <p style={{ fontSize: 15, fontWeight: 600, color: theme.text.primary, marginBottom: 8 }}>
@@ -553,12 +552,12 @@ function AppContent() {
             </div>
           )}
           <div
+            className={`cognote-main-wrap${toolbarVisible ? ' cognote-sidebar-visible' : ''}`}
             style={{
               flex: 1,
               minHeight: 0,
               display: 'flex',
               overflow: 'hidden',
-              marginLeft: toolbarVisible ? TOOLBAR_OFFSET.left : 0,
             }}
           >
             <div
@@ -570,6 +569,7 @@ function AppContent() {
                   }}
                 >
                   <div
+                    className="cognote-doc-area"
                     style={{
                       flex: 1,
                       minWidth: 0,
@@ -578,15 +578,13 @@ function AppContent() {
                       display: 'flex',
                       flexDirection: 'column',
                       margin: '0 auto',
-                      padding: '0 clamp(8px, 1.5vw, 24px)',
                     }}
                   >
                     <div
+                      className="cognote-filename-bar"
                       style={{
-                        padding: '12px 20px',
                         borderBottom: `1px solid ${theme.border.default}`,
                         background: theme.bg.surface,
-                        fontSize: 13,
                         fontWeight: 600,
                         color: theme.text.secondary,
                         display: 'flex',
@@ -603,12 +601,11 @@ function AppContent() {
                   </div>
                   {pageSidebarOpen && (
                     <div
+                      className="cognote-page-resize-handle"
                       role="separator"
                       aria-label="Resize All Pages panel"
                       onMouseDown={startResizePageSidebar}
                       style={{
-                        width: 6,
-                        minWidth: 6,
                         flexShrink: 0,
                         cursor: 'col-resize',
                         background: theme.border.subtle,
@@ -623,9 +620,10 @@ function AppContent() {
                     />
                   )}
                   <div
+                    className={pageSidebarOpen ? 'cognote-page-sidebar-wrap' : ''}
                     style={{
                       width: pageSidebarOpen ? pageSidebarWidth : 0,
-                      minWidth: pageSidebarOpen ? 160 : 0,
+                      minWidth: pageSidebarOpen ? undefined : 0,
                       overflow: 'hidden',
                       transition: 'width 0.2s ease-out',
                       flexShrink: 0,
@@ -689,25 +687,24 @@ function AppContent() {
           onToggleToolbar={() => setToolbarVisible((v) => !v)}
         />
         <div
+          className={`cognote-main-wrap${toolbarVisible ? ' cognote-sidebar-visible' : ''}`}
           style={{
             flex: 1,
             minHeight: 0,
             display: 'flex',
             overflow: 'hidden',
-            marginLeft: toolbarVisible ? TOOLBAR_OFFSET.left : 0,
           }}
         >
           <div
+            className="cognote-drop-zone"
             style={{
               flex: 1,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: 24,
               border: `2px dashed ${theme.border.strong}`,
               borderRadius: 16,
-              margin: 24,
               background: theme.bg.surface,
               cursor: 'pointer',
             }}
@@ -717,10 +714,10 @@ function AppContent() {
             tabIndex={0}
             aria-label="Add PDF"
           >
-            <p style={{ fontSize: 18, fontWeight: 700, color: theme.text.primary, marginBottom: 8 }}>
+            <p className="cognote-drop-zone-title" style={{ fontSize: 18, fontWeight: 700, color: theme.text.primary, marginBottom: 8 }}>
               Add PDF
             </p>
-            <p style={{ fontSize: 14, color: theme.text.secondary, margin: 0 }}>
+            <p className="cognote-drop-zone-hint" style={{ fontSize: 14, color: theme.text.secondary, margin: 0 }}>
               Click or drop PDF files here (multiple allowed)
             </p>
           </div>

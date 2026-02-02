@@ -891,8 +891,10 @@ export function SmoothAnnotationCanvas({ pageIndex, widthPx, heightPx }: SmoothA
                 return minY - 44;
               })(),
               display: 'flex',
+              flexWrap: 'wrap',
               gap: 2,
               padding: '4px 6px',
+              maxWidth: Math.max(120, widthPx - 16),
               background: theme.bg.elevated,
               border: `1px solid ${theme.border.strong}`,
               borderRadius: 12,
