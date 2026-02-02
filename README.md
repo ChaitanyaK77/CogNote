@@ -26,6 +26,16 @@ npm run dev
 
 Open the URL shown in the terminal (e.g. http://localhost:5173/).
 
+## Hosting on GitHub Pages
+
+The repo includes a workflow that builds and deploys the app on every push to `main`. To enable:
+
+1. In your repo on GitHub, go to **Settings** > **Pages**.
+2. Under **Build and deployment**, set **Source** to **GitHub Actions**.
+3. Push to `main`; the workflow will build and deploy. The site will be at:
+
+   **https://chaitanyak77.github.io/CogNote/**
+
 ## Usage
 
 - **Add PDF**: Click "Add PDF" in the navbar or drop a PDF on the empty state. You can select multiple files at once.
