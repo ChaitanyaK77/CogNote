@@ -257,8 +257,6 @@ export function FunkyToolbar({
         style={{
           position: 'relative',
           zIndex: 200,
-          height: theme.topBarHeight,
-          minHeight: theme.topBarHeight,
           display: 'flex',
           alignItems: 'center',
           paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
@@ -649,8 +647,9 @@ export function FunkyToolbar({
             onClick={() => setMobileMenuOpen(false)}
             style={{
               position: 'fixed',
-              inset: 0,
-              top: theme.topBarHeight,
+              left: 0,
+              right: 0,
+              bottom: 0,
               background: 'rgba(0,0,0,0.4)',
               zIndex: 199,
             }}
@@ -661,7 +660,6 @@ export function FunkyToolbar({
             aria-label="Menu"
             style={{
               position: 'fixed',
-              top: theme.topBarHeight,
               left: 0,
               right: 0,
               bottom: 0,
@@ -816,7 +814,6 @@ export function FunkyToolbar({
           aria-label="Keyboard shortcuts"
           style={{
             position: 'fixed',
-            top: theme.topBarHeight + 8,
             right: 'max(16px, env(safe-area-inset-right, 0px))',
             left: 'auto',
             padding: 16,
