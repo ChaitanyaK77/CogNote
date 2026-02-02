@@ -8,7 +8,7 @@ import { StoreProvider, useAppState, useHashBuffer } from './core/store';
 import { getDocumentState, saveDocumentState } from './lib/storage';
 import { addToLibrary } from './lib/libraryStorage';
 import { loadPdfFromArrayBuffer } from './lib/pdfLoader';
-import { FunkyToolbar, TOOLBAR_OFFSET } from './components/FunkyToolbar';
+import { FunkyToolbar } from './components/FunkyToolbar';
 import { DocumentViewer } from './components/DocumentViewer';
 import { PageSidebar } from './components/PageSidebar';
 import { KeyboardShortcuts } from './components/KeyboardShortcuts';
